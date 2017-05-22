@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <X11/cursorfont.h>
@@ -2209,8 +2210,13 @@ updatetitle(Client *c)
 void
 updatestatus(void)
 {
-	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
-		strcpy(stext, "dwm-"VERSION);
+	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext))) {
+		time_t t;
+		struct tm *info;
+		time(&t);
+		info = localtime(&t);
+		strftime(stext, sizeof(stext), "%a %b %_2d %H:%M", info);
+	}
 	drawbar(selmon);
 	updatesystray();
 }
