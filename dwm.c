@@ -29,6 +29,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <time.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <X11/cursorfont.h>
@@ -231,6 +232,7 @@ static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
+static void self_restart(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setup(void);
 static void seturgent(Client *c, int urg);
@@ -274,6 +276,7 @@ static void zoom(const Arg *arg);
 static Systray *systray = NULL;
 static const char broken[] = "broken";
 static char stext[256];
+static char *binary_path = NULL;
 static int screen;
 static int sw, sh;           /* X display screen geometry width, height */
 static int bh, blw = 0;      /* bar geometry */
@@ -2484,6 +2487,53 @@ zoom(const Arg *arg)
 	pop(c);
 }
 
+void get_dwm_path(){
+    struct stat s;
+    int r, length, rate = 42;
+
+    if(lstat("/proc/self/exe", &s) == -1){
+        perror("lstat:");
+        return;
+    }
+
+    length = s.st_size + 1 - rate;
+
+    do{
+        length+=rate;
+
+        free(binary_path);
+        binary_path = malloc(sizeof(char) * length);
+
+        if(binary_path == NULL){
+            perror("malloc:");
+            return;
+        }
+
+        r = readlink("/proc/self/exe", binary_path, length);
+
+        if(r == -1){
+            perror("readlink:");
+            return;
+        }
+    }while(r >= length);
+
+    binary_path[r] = '\0';
+}
+
+void self_restart(const Arg *arg) {
+    char *const argv[] = {binary_path, NULL};
+
+    if(argv[0] == NULL){
+        return;
+    }
+
+    if (execv(argv[0], argv) == -1) {
+        printf("argv: |%s|\n", argv[0]);
+        perror("execv:");
+        return;
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -2495,6 +2545,7 @@ main(int argc, char *argv[])
 		fputs("warning: no locale support\n", stderr);
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dwm: cannot open display");
+        get_dwm_path();
 	checkotherwm();
 	setup();
 	scan();
