@@ -2578,6 +2578,7 @@ void self_restart(const Arg *arg) {
         return;
     }
 
+    kill(status_pid, SIGTERM);
     if (execv(argv[0], argv) == -1) {
         printf("argv: |%s|\n", argv[0]);
         perror("execv:");
