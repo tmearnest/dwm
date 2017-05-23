@@ -315,6 +315,8 @@ static Window root, wmcheckwin;
 /* configuration, allows nested code to access above variables */
 #include "config.h"
 
+static pid_t status_pid;
+
 static unsigned int scratchtag = 1 << LENGTH(tags);
 
 /* compile-time check if all tags fit into an unsigned int bit array. */
@@ -513,6 +515,7 @@ checkotherwm(void)
 void
 cleanup(void)
 {
+        kill(status_pid, SIGTERM);
 	Arg a = {.ui = ~0};
 	Layout foo = { "", NULL };
 	Monitor *m;
@@ -2266,13 +2269,8 @@ updatetitle(Client *c)
 void
 updatestatus(void)
 {
-	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext))) {
-		time_t t;
-		struct tm *info;
-		time(&t);
-		info = localtime(&t);
-		strftime(stext, sizeof(stext), "%a %b %_2d %H:%M", info);
-	}
+	if (!gettextprop(root, XA_WM_NAME, stext, sizeof(stext)))
+                strcpy(stext, "dwm-"VERSION);
 	drawbar(selmon);
 	updatesystray();
 }
@@ -2587,6 +2585,33 @@ void self_restart(const Arg *arg) {
     }
 }
 
+
+void
+fork_status() {
+    status_pid = fork();
+    if (status_pid == 0) {
+        Display *dpy = XOpenDisplay(NULL);
+        if (!dpy) {
+            perror("XOpenDisplay");
+            exit(-1);
+        }
+        sleep(10);
+        for (;;) {
+            char buf[256];
+            time_t t;
+            struct tm *info;
+            time(&t);
+            info = localtime(&t);
+            strftime(buf, sizeof(buf), "%a %b %_2d %H:%M", info);
+
+            XStoreName(dpy, DefaultRootWindow(dpy), buf);
+            XSync(dpy, False);
+
+            sleep(59);
+        }
+    }
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -2596,6 +2621,7 @@ main(int argc, char *argv[])
 		die("usage: dwm [-v]");
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fputs("warning: no locale support\n", stderr);
+        fork_status();
 	if (!(dpy = XOpenDisplay(NULL)))
 		die("dwm: cannot open display");
         get_dwm_path();
