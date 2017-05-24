@@ -30,7 +30,7 @@ dwm: ${OBJ}
 
 dwm_status: dwm_status.c
 	@echo CC -o $@
-	@${CC} -I/opt/cuda/include -L/opt/cuda/lib dwm_status.c -o dwm_status -lX11 -lnvidia-ml
+	@${CC} dwm_status.c -o dwm_status -lX11 ${CUDA}
 
 
 clean:

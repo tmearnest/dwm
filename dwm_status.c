@@ -6,9 +6,10 @@
 #include <string.h>
 #include <X11/Xlib.h>
 
-#include <nvml.h>
-
 char *program;
+
+#ifdef CUDA
+#include <nvml.h>
 
 #define NVML_EXEC(x) do { \
     nvmlReturn_t status = (x);  \
@@ -18,6 +19,7 @@ char *program;
         exit(-1); \
     } \
 } while(0) 
+#endif
 
 int
 get_mem(void)
@@ -82,8 +84,6 @@ get_cpu(void)
 void
 status(Display *dpy, int device_count)
 {
-    nvmlReturn_t result;
-    nvmlDevice_t device;
     unsigned int i;
 
     int cur = 0;
@@ -100,6 +100,9 @@ status(Display *dpy, int device_count)
     if (cpu > 0)
         statusf("c%d ", cpu);
 
+#ifdef CUDA
+    nvmlReturn_t result;
+    nvmlDevice_t device;
     for (int i=0; i < device_count; i++) {
         nvmlUtilization_t util;
         NVML_EXEC(nvmlDeviceGetHandleByIndex(i, &device));
@@ -107,6 +110,7 @@ status(Display *dpy, int device_count)
         if (util.gpu > 0) 
             statusf("g%dc%dm%d ", i, util.gpu, util.memory);
     }
+#endif
 
     char buf[256];
     time_t t;
@@ -133,8 +137,10 @@ main(int argc, char *argv[]) {
             exit(-1);
         }
 
+#ifdef CUDA
         NVML_EXEC(nvmlInit());
         NVML_EXEC(nvmlDeviceGetCount(&device_count));
+#endif
 
         for (;;) {
             status(dpy, device_count);
