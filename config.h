@@ -56,14 +56,14 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 static const char scratchpadname[] = "scratchpadterm";
-static const char *scratchpadcmd[] = { "urxvtc", "-name", scratchpadname, NULL};
+static const char *scratchpadcmd[] = { "termite", "--name", scratchpadname, NULL};
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
-static const char *termcmd[]  = { "urxvtc", NULL };
+static const char *termcmd[]  = { "termite", NULL };
 static const char *webcmd[]  = { "google-chrome-stable", NULL };
 static const char *passcmd[] = { "passmenu", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
-static const char *mailcmd[]  = {"urxvtc", "-e", "ssh", "-t", "akmodan", "/home/earnest3/.mutt/launch.sh", NULL};
+static const char *mailcmd[]  = {"termite", "-e", "ssh -t akmodan /home/earnest3/.mutt/launch.sh", NULL};
 static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
 
 static Key keys[] = {
