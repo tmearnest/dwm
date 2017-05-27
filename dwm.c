@@ -190,7 +190,7 @@ static void detach(Client *c);
 static void detachstack(Client *c);
 static Monitor *dirtomon(int dir);
 static void drawbar(Monitor *m);
-static int drawstatusbar(Monitor *m, int bh, char* text);
+static int drawstatusbar(Monitor *m, int bh, int stw, char* text);
 static void drawbars(void);
 static void enqueue(Client *c);
 static void enqueuestack(Client *c);
@@ -797,7 +797,7 @@ dirtomon(int dir)
 }
 
 int
-drawstatusbar(Monitor *m, int bh, char* stext) {
+drawstatusbar(Monitor *m, int bh, int stw, char* stext) {
 	int ret, i, w, x, len;
 	short isCode = 0;
 	char *text;
@@ -835,7 +835,7 @@ drawstatusbar(Monitor *m, int bh, char* stext) {
 	text = p;
 
 	w += 2; /* 1px padding on both sides */
-	ret = x = m->ww - w;
+	ret = x = m->ww - w - stw;
 
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
 	drw->scheme[ColFg] = scheme[SchemeNorm][ColFg];
@@ -910,7 +910,7 @@ drawbar(Monitor *m)
 
 	/* draw status first so it can be overdrawn by tags later */
 	if (m == selmon)   /* status is only drawn on selected monitor */
- 	    sw = m->ww - drawstatusbar(m, bh, stext);
+ 	    sw = m->ww - drawstatusbar(m, bh, stw, stext);
 
 	resizebarwin(m);
 	for (c = m->clients; c; c = c->next) {
