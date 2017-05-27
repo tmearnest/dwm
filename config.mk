@@ -37,5 +37,3 @@ LDFLAGS  = -s ${LIBS}
 # compiler and linker
 CC = cc
 
-#CUDA=-I/opt/cuda/include -L/opt/cuda/lib -lnvidia-ml -DCUDA
-

@@ -1,44 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <errno.h>
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
 #include <X11/Xlib.h>
 
-char *program;
+#define N_CPU_DATA 45
 
-#ifdef CUDA
-#include <nvml.h>
-
-#define NVML_EXEC(x) do { \
-    nvmlReturn_t status = (x);  \
-    if (NVML_SUCCESS != status) { \
-        fprintf(stderr, "%s: NVML call failed: %s\n", program, nvmlErrorString(status)); \
-        nvmlShutdown(); \
-        exit(-1); \
-    } \
-} while(0) 
-#endif
-
-int
-get_mem(void)
-{
-  unsigned long memAvail=0, memTotal=0;
-  char buf[256];
-  
-  FILE *fp = fopen("/proc/meminfo", "r");
-
-  while (fgets(buf, sizeof(buf), fp)) {
-      if (sscanf(buf, "MemTotal: %lu kB\n", &memTotal) == 1)
-          continue;
-      if (sscanf(buf, "MemAvailable: %lu kB\n", &memAvail) == 1)
-          break;
-  }
-  fclose(fp);
-
-  return (memTotal-memAvail) >> 20;
-}
+double cpu_data[N_CPU_DATA];
 
 void
 cputicks(unsigned long* idleTicks, unsigned long* totalTicks)
@@ -55,29 +24,45 @@ cputicks(unsigned long* idleTicks, unsigned long* totalTicks)
 
 
 int
-get_cpu(void)
-{
-  static int initialTicks = 0;
-  static unsigned long idle0 = 0;
-  static unsigned long total0 = 0;
-  static int nth = 0;
-  unsigned long idle, total;
+cpuGraph(char *str, int n_str, char *bg, char *fg, int y0, int y1, int margin) {
+    int i;
+    static int initialTicks = 0;
+    static unsigned long idle0 = 0;
+    static unsigned long total0 = 0;
+    unsigned long idle, total;
 
-  if (!initialTicks) {
-      nth = sysconf(_SC_NPROCESSORS_CONF);
-      cputicks(&idle0, &total0);
-      sleep(1);
-      initialTicks = 1;
-  }
+    if (!initialTicks) {
+        for (i=0; i < N_CPU_DATA; i++)
+            cpu_data[i]  = 0;
+        cputicks(&idle0, &total0);
+        sleep(1);
+        initialTicks = 1;
+    }
 
-  cputicks(&idle, &total);
+    cputicks(&idle, &total);
 
-  double dtot = 1.0*(total-total0);
-  double didl = 1.0*(idle-idle0);
-  double cpu = (dtot>0) ? (1.0 - 1.0*didl/dtot) : 0.0;
-  idle0 = idle;
-  total0 = total;
-  return nth*cpu;
+    memmove(cpu_data+1, cpu_data, (N_CPU_DATA-1)*sizeof(double));
+    double dtot = 1.0*(total-total0);
+    double didl = 1.0*(idle-idle0);
+    cpu_data[0] = (dtot>0) ? (1.0 - 1.0*didl/dtot) : 0.0;
+
+    idle0 = idle;
+    total0 = total;
+
+    int cur = 0;
+    int x0 = margin;
+    int h = y1-y0;
+    int w = 2*margin+N_CPU_DATA;
+
+    cur += snprintf(str+cur, n_str-cur-1, "^c%s^^r%d,%d,%d,%d^^c%s^", bg, x0, y0, N_CPU_DATA, h, fg);
+    for (i=0; i < N_CPU_DATA; i++) {
+        int y =  h*cpu_data[i];
+        int y0_ = y0 + h-y;
+        cur += snprintf(str+cur, n_str-cur-1, "^r%d,%d,%d,%d^", x0+(N_CPU_DATA-i-1), y0_, 1, y);
+    }
+    cur += snprintf(str+cur, n_str-cur-1, "^f%d^^d^", w);
+
+    return cur;
 }
 
 
@@ -87,64 +72,34 @@ status(Display *dpy, int device_count)
     unsigned int i;
 
     int cur = 0;
-    char str[64];
-    str[0] = 0;
+    char str[1024];
 
-#define statusf(format, ...) cur += snprintf(str+cur, sizeof(str)-cur-1, format, __VA_ARGS__)
+    cur += cpuGraph(str, sizeof(str)-cur-1, "#202020", "#575757", 2, 16, 5);
 
-    int mem = get_mem();
-    if (mem > 32)
-        statusf("m%d ", (int)get_mem());
-
-    int cpu = get_cpu();
-    if (cpu > 0)
-        statusf("c%d ", cpu);
-
-#ifdef CUDA
-    nvmlReturn_t result;
-    nvmlDevice_t device;
-    for (int i=0; i < device_count; i++) {
-        nvmlUtilization_t util;
-        NVML_EXEC(nvmlDeviceGetHandleByIndex(i, &device));
-        NVML_EXEC(nvmlDeviceGetUtilizationRates (device, &util));
-        if (util.gpu > 0) 
-            statusf("g%dc%dm%d ", i, util.gpu, util.memory);
-    }
-#endif
-
-    char buf[256];
     time_t t;
     struct tm *info;
     time(&t);
     info = localtime(&t);
-    strftime(buf, sizeof(buf), "%a %b %_2d %H:%M", info);
-    statusf("%s", buf);
+    cur += strftime(str+cur, sizeof(str)-cur-1, " %a %b %_2d %H:%M ", info);
     XStoreName(dpy, DefaultRootWindow(dpy), str);
     XSync(dpy, False);
-
-#undef statusf
 }
+
 
 int
 main(int argc, char *argv[]) {
-    program = argv[0];
     int device_count = 0;
 
     if (fork() == 0) {
         Display *dpy = XOpenDisplay(NULL);
         if (!dpy) {
-            fprintf(stderr, "%s: Failed to open display\n", program);
+            fprintf(stderr, "%s: Failed to open display\n", argv[0]);
             exit(-1);
         }
 
-#ifdef CUDA
-        NVML_EXEC(nvmlInit());
-        NVML_EXEC(nvmlDeviceGetCount(&device_count));
-#endif
-
         for (;;) {
             status(dpy, device_count);
-            sleep(1);
+            sleep(2);
         }
     }
 }
