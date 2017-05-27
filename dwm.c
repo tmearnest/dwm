@@ -275,6 +275,7 @@ static int xerror(Display *dpy, XErrorEvent *ee);
 static int xerrordummy(Display *dpy, XErrorEvent *ee);
 static int xerrorstart(Display *dpy, XErrorEvent *ee);
 static void zoom(const Arg *arg);
+static void sel_next_layout(const Arg *arg);
 
 /* variables */
 static Systray *systray = NULL;
@@ -313,6 +314,8 @@ static Display *dpy;
 static Drw *drw;
 static Monitor *mons, *selmon;
 static Window root, wmcheckwin;
+static int layout_idx;
+static int num_layouts;
 
 /* configuration, allows nested code to access above variables */
 #include "config.h"
@@ -1734,6 +1737,8 @@ setup(void)
 	sigchld(0);
 
 	/* init screen */
+        layout_idx = 0;
+        num_layouts = sizeof(layouts)/sizeof(Layout);
 	screen = DefaultScreen(dpy);
 	sw = DisplayWidth(dpy, screen);
 	sh = DisplayHeight(dpy, screen);
@@ -2586,6 +2591,13 @@ void self_restart(const Arg *arg) {
     }
 }
 
+void
+sel_next_layout(const Arg * arg) {
+    layout_idx = (layout_idx + 1) % num_layouts;
+    Arg a;
+    a.v =  &layouts[layout_idx];
+    setlayout(&a);
+}
 
 
 int
