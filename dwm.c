@@ -835,7 +835,8 @@ drawstatusbar(Monitor *m, int bh, int stw, char* stext) {
 	text = p;
 
 	w += 2; /* 1px padding on both sides */
-	ret = x = m->ww - w - stw;
+	ret = m->ww - w;
+	x = m->ww - w - stw;
 
 	drw_setscheme(drw, scheme[LENGTH(colors)]);
 	drw->scheme[ColFg] = scheme[SchemeNorm][ColFg];
@@ -2522,6 +2523,7 @@ updatesystray(void)
 	XWindowChanges wc;
 	Client *i;
 	Monitor *m = systraytomon(NULL);
+        unsigned long shadow[] = { 0x00000000 };
 	unsigned int x = m->mx + m->mw;
 	unsigned int w = 1;
 
@@ -2539,6 +2541,7 @@ updatesystray(void)
 		XChangeProperty(dpy, systray->win, netatom[NetSystemTrayOrientation], XA_CARDINAL, 32,
 				PropModeReplace, (unsigned char *)&netatom[NetSystemTrayOrientationHorz], 1);
 		XChangeWindowAttributes(dpy, systray->win, CWEventMask|CWOverrideRedirect|CWBackPixel, &wa);
+		XChangeProperty(dpy, systray->win, wunshadow, XA_CARDINAL, 32, PropModeReplace, (unsigned char *)shadow, 1);
 		XMapRaised(dpy, systray->win);
 		XSetSelectionOwner(dpy, netatom[NetSystemTray], systray->win, CurrentTime);
 		if (XGetSelectionOwner(dpy, netatom[NetSystemTray]) == systray->win) {
