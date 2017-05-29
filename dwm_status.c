@@ -18,8 +18,8 @@ cputicks(unsigned long* idleTicks, unsigned long* totalTicks)
           &idle, &iowait, &irq, &softirq, &steal, &guest, &guest_nice);
   fclose(fp);
 
-  *totalTicks = user + nice + sys + idle + iowait + irq + softirq + steal + guest + guest_nice;
-  *idleTicks = idle;
+  *totalTicks = user + nice + sys + idle + irq + softirq + steal + guest + guest_nice;
+  *idleTicks = idle + iowait;
 }
 
 
