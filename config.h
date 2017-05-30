@@ -1,7 +1,7 @@
 /* See LICENSE file for copyright and license details. */
 
 /* appearance */
-static const unsigned int borderpx  = 2;        /* border pixel of windows */
+static const unsigned int borderpx  = 1;        /* border pixel of windows */
 static const unsigned int snap      = 8;       /* snap pixel */
 static const unsigned int gappx     = 4;       /* useless gap */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
@@ -16,11 +16,12 @@ static const char col_gray1[]       = "#282828";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
-static const char col_pri[]        = "#871220";
-static const char *colors[][3]      = {
-	/*               fg         bg         border   */
-	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
-	[SchemeSel] =  { col_gray4, col_pri,  col_pri  },
+static const char col_float[]       = "#ffed00";
+static const char col_pri[]         = "#871220";
+static const char *colors[][4]      = {
+ 	/*               fg         bg         border     float */
+	[SchemeNorm] = { col_gray3, col_gray1, col_gray2, col_float},
+	[SchemeSel] =  { col_gray4, col_pri,   col_pri,   col_pri  },
 };
 
 /* tagging */
