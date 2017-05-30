@@ -56,7 +56,7 @@ cpuGraph(char *str, int n_str, char *bg, char *fg, int y0, int y1, int margin) {
 
     cur += snprintf(str+cur, n_str-cur-1, "^c%s^^r%d,%d,%d,%d^^c%s^", bg, x0, y0, N_CPU_DATA, h, fg);
     for (i=0; i < N_CPU_DATA; i++) {
-        int y =  h*cpu_data[i];
+        int y =  h*cpu_data[i]+0.5;
         int y0_ = y0 + h-y;
         cur += snprintf(str+cur, n_str-cur-1, "^r%d,%d,%d,%d^", x0+(N_CPU_DATA-i-1), y0_, 1, y);
     }
