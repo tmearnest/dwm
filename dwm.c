@@ -1309,7 +1309,10 @@ manage(Window w, XWindowAttributes *wa)
 	           && (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
 	c->bw = borderpx;
 
-	if (!strcmp(c->name, scratchpadname)) {
+	XClassHint ch = { NULL, NULL };
+	XGetClassHint(dpy, c->win, &ch);
+
+	if (!strcmp(ch.res_name, scratchpadname)) {
 		c->mon->tagset[c->mon->seltags] |= c->tags = scratchtag;
 		c->isfloating = True;
 		c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
