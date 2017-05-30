@@ -285,6 +285,7 @@ static void bstack(Monitor *m);
 static void bstackhoriz(Monitor *m);
 static void centeredmaster(Monitor *m);
 static void centeredfloatingmaster(Monitor *m);
+static void updateborderwidth(Client* c, int bw);
  
 
 /* variables */
@@ -1273,12 +1274,21 @@ killclient(const Arg *arg)
 	}
 }
 
+
+void 
+updateborderwidth(Client* c, int bw) 
+{
+	XWindowChanges wc;
+	wc.border_width = bw;
+	XConfigureWindow(dpy, c->win, CWBorderWidth, &wc);
+        c->bw = bw;
+}
+
 void
 manage(Window w, XWindowAttributes *wa)
 {
 	Client *c, *t = NULL;
 	Window trans = None;
-	XWindowChanges wc;
 
 	c = ecalloc(1, sizeof(Client));
 	c->win = w;
@@ -1307,7 +1317,6 @@ manage(Window w, XWindowAttributes *wa)
 	/* only fix client y-offset, if the client center might cover the bar */
 	c->y = MAX(c->y, ((c->mon->by == c->mon->my) && (c->x + (c->w / 2) >= c->mon->wx)
 	           && (c->x + (c->w / 2) < c->mon->wx + c->mon->ww)) ? bh : c->mon->my);
-	c->bw = borderpx;
 
 	XClassHint ch = { NULL, NULL };
 	XGetClassHint(dpy, c->win, &ch);
@@ -1319,8 +1328,6 @@ manage(Window w, XWindowAttributes *wa)
 		c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 	}
 
-	wc.border_width = c->bw;
-	XConfigureWindow(dpy, w, CWBorderWidth, &wc);
 	configure(c); /* propagates border_width, if size doesn't change */
 	updatewindowtype(c);
 	updatesizehints(c);
@@ -1331,9 +1338,11 @@ manage(Window w, XWindowAttributes *wa)
 		c->isfloating = c->oldstate = trans != None || c->isfixed;
 	if (c->isfloating) {
  		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColFloat].pixel);
+                updateborderwidth(c, floatingborderpx);
 		XRaiseWindow(dpy, c->win);
         } else {
 		XSetWindowBorder(dpy, w, scheme[SchemeNorm][ColBorder].pixel);
+                updateborderwidth(c, borderpx);
         }
 	shadowfloat(c);
 	attach(c);
@@ -1345,7 +1354,9 @@ manage(Window w, XWindowAttributes *wa)
 	if (c->mon == selmon)
 		unfocus(selmon->sel, 0);
 	c->mon->sel = c;
+
 	arrange(c->mon);
+
 	XMapWindow(dpy, c->win);
 	focus(NULL);
 }
@@ -1606,7 +1617,7 @@ resizeclient(Client *c, int x, int y, int w, int h)
 		/* Remove border and gap if layout is monocle or only one client */
 		if (selmon->lt[selmon->sellt]->arrange == monocle || n == 1) {
 			gapoffset = 0;
-			gapincr = -2 * borderpx;
+			gapincr = -2 * c->bw;
 			wc.border_width = 0;
 		} else {
 			gapoffset = gappx;
@@ -2150,9 +2161,11 @@ togglefloating(const Arg *arg)
 	selmon->sel->isfloating = !selmon->sel->isfloating || selmon->sel->isfixed;
 	if (selmon->sel->isfloating) {
 		XSetWindowBorder(dpy, selmon->sel->win, scheme[SchemeSel][ColFloat].pixel);
+                updateborderwidth(selmon->sel, floatingborderpx);
 		resize(selmon->sel, selmon->sel->x, selmon->sel->y,
 		       selmon->sel->w, selmon->sel->h, 0);
         } else {
+                updateborderwidth(selmon->sel, borderpx);
 		XSetWindowBorder(dpy, selmon->sel->win, scheme[SchemeSel][ColBorder].pixel);
         }
 	shadowfloat(selmon->sel);

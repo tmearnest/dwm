@@ -2,6 +2,7 @@
 
 /* appearance */
 static const unsigned int borderpx  = 1;        /* border pixel of windows */
+static const unsigned int floatingborderpx  = 4;        /* border pixel of windows floating */
 static const unsigned int snap      = 8;       /* snap pixel */
 static const unsigned int gappx     = 4;       /* useless gap */
 static const unsigned int systraypinning = 0;   /* 0: sloppy systray follows selected monitor, >0: pin systray to monitor X */
@@ -16,11 +17,10 @@ static const char col_gray1[]       = "#282828";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
-static const char col_float[]       = "#ffed00";
 static const char col_pri[]         = "#871220";
 static const char *colors[][4]      = {
  	/*               fg         bg         border     float */
-	[SchemeNorm] = { col_gray3, col_gray1, col_gray2, col_float},
+	[SchemeNorm] = { col_gray3, col_gray1, col_gray2, col_gray2},
 	[SchemeSel] =  { col_gray4, col_pri,   col_pri,   col_pri  },
 };
 
@@ -96,11 +96,10 @@ static Key keys[] = {
 	{ MODKEY,                       XK_Return, rotatestack,    {.i = +1 } },
 	{ MODKEY,                       XK_Tab,    rotatestack,    {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_c,      killclient,     {0} },
-	{ MODKEY,                       XK_t,      setlayout,      {.v = &layouts[0]} },
 	{ MODKEY,                       XK_m,      setlayout,      {.v = &layouts[1]} },
 	{ MODKEY,                       XK_f,      setlayout,      {.v = &floatingLayout}},
 	{ MODKEY,                       XK_space,  sel_next_layout,{0} },
-	{ MODKEY|ShiftMask,             XK_space,  togglefloating, {0} },
+	{ MODKEY,                       XK_t,      togglefloating, {0} },
 	{ MODKEY,                       XK_0,      view,           {.ui = ~0 } },
 	{ MODKEY|ShiftMask,             XK_0,      tag,            {.ui = ~0 } },
 	{ MODKEY,                       XK_comma,  focusmon,       {.i = -1 } },
