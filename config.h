@@ -63,15 +63,28 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 static const char scratchpadname[] = "scratchpadterm";
+#ifdef BSD
+static const char *scratchpadcmd[] = { "urxvtc", "-name", scratchpadname, NULL};
+#else
 static const char *scratchpadcmd[] = { "termite", "--name", scratchpadname, NULL};
+#endif
+
+
 /* commands */
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
+static const char *passcmd[] = { "passmenu", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
+static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
+
+#ifdef BSD
+static const char *termcmd[]  = { "urxvtc", NULL };
+static const char *webcmd[]  = { "chrome", NULL };
+static const char *mailcmd[]  = {"urxvtc", "-e", "ssh", "-t", "akmodan", "/home/e arnest3/.mutt/launch.sh", NULL};
+#else
 static const char *termcmd[]  = { "termite", NULL };
 static const char *webcmd[]  = { "google-chrome-stable", NULL };
-static const char *passcmd[] = { "passmenu", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
 static const char *mailcmd[]  = {"termite", "-e", "ssh -t akmodan /home/earnest3/.mutt/launch.sh", NULL};
-static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
+#endif
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -106,7 +119,9 @@ static Key keys[] = {
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+#ifndef BSD
         { MODKEY|ShiftMask,             XK_r,      self_restart,   {0} }, 
+#endif
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)

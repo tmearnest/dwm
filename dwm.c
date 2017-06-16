@@ -238,7 +238,9 @@ static void setclientstate(Client *c, long state);
 static void setfocus(Client *c);
 static void setfullscreen(Client *c, int fullscreen);
 static void setlayout(const Arg *arg);
+#ifndef BSD
 static void self_restart(const Arg *arg);
+#endif
 static void setmfact(const Arg *arg);
 static void setcfact(const Arg *arg);
 static void setup(void);
@@ -2797,6 +2799,7 @@ void get_dwm_path(){
     binary_path[r] = '\0';
 }
 
+#ifndef BSD
 void self_restart(const Arg *arg) {
     char *const argv[] = {binary_path, NULL};
 
@@ -2810,6 +2813,7 @@ void self_restart(const Arg *arg) {
         return;
     }
 }
+#endif
 
 void
 sel_next_layout(const Arg * arg) {
