@@ -30,7 +30,7 @@ dwm: ${OBJ}
 
 dwm_status: dwm_status.c
 	@echo CC -o $@
-	@${CC} dwm_status.c -o dwm_status -lX11 ${CUDA}
+	@${CC} ${CFLAGS} dwm_status.c -o dwm_status ${LDFLAGS}
 
 
 clean:
