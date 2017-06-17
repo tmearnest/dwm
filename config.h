@@ -79,7 +79,7 @@ static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
 #ifdef BSD
 static const char *termcmd[]  = { "st", NULL };
 static const char *webcmd[]  = { "chrome", NULL };
-static const char *mailcmd[]  = {"st", "-e", "ssh", "-t", "akmodan", "/home/e arnest3/.mutt/launch.sh", NULL};
+static const char *mailcmd[]  = {"st", "-e", "ssh", "-t", "akmodan", "/home/earnest3/.mutt/launch.sh", NULL};
 #else
 static const char *termcmd[]  = { "termite", NULL };
 static const char *webcmd[]  = { "google-chrome-stable", NULL };
