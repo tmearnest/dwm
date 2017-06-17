@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <err.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <time.h>
@@ -10,7 +11,8 @@
 #include <fcntl.h>
 
 void
-status(Display *dpy, int device_count) {
+status(Display *dpy, int device_count)
+{
 	int fd;
 	int cur = 0;
 	char str[256];
@@ -23,10 +25,11 @@ status(Display *dpy, int device_count) {
         const char* color_start;
         const char* color_end;
 
+	ac = color_start = color_end = "";
+
 	if (ioctl(fd, APM_IOC_GETPOWER, &power_info) == 0) {
         	switch (power_info.ac_state) {
 			case APM_AC_OFF:
-				ac = "";
 				break;
 			case APM_AC_ON:
 				ac = "ac";
@@ -42,15 +45,12 @@ status(Display *dpy, int device_count) {
 		if (power_info.battery_life<10) {
 			color_start = "^c#ffff00^";
 			color_end = "^d^";
-		} else {
-			color_start = color_end = "";
 		}
 
 	} else {
 		XStoreName(dpy, DefaultRootWindow(dpy), "ioctl failed");
 		XSync(dpy, False);
-		fprintf(stderr, "ioctl failed\n");
-		exit(-1);
+		err(1, NULL);
 	}
 
 	close(fd);
@@ -69,14 +69,14 @@ status(Display *dpy, int device_count) {
 
 
 int
-main(int argc, char *argv[]) {
+main(int argc, char *argv[])
+{
 	int device_count = 0;
 
 	if (fork() == 0) {
 		Display *dpy = XOpenDisplay(NULL);
 		if (!dpy) {
-			fprintf(stderr, "%s: Failed to open display\n", argv[0]);
-			exit(-1);
+			errx(1, "%s: Failed to open display\n", argv[0]);
 		}
 
 		for (;;) {
