@@ -34,3 +34,4 @@ LDFLAGS  = -s ${LIBS}
 # compiler and linker
 CC = cc
 
+STATUS_SRC = dwm_status_openbsd.c

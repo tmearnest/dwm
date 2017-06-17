@@ -28,9 +28,9 @@ dwm: ${OBJ}
 	@echo CC -o $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
-dwm_status: dwm_status.c
+dwm_status: ${STATUS_SRC}
 	@echo CC -o $@
-	@${CC} ${CFLAGS} dwm_status.c -o dwm_status ${LDFLAGS}
+	@${CC} ${CFLAGS} ${STATUS_SRC} -o dwm_status ${LDFLAGS}
 
 
 clean:
