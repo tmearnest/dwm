@@ -62,7 +62,7 @@ status(Display *dpy, int device_count) {
 	struct tm *info;
 	time(&t);
 	info = localtime(&t);
-	cur += strftime(str+cur, sizeof(str)-cur-1, " %a %b %2d %H:%M ", info);
+	cur += strftime(str+cur, sizeof(str)-cur-1, " %a %b %d %H:%M ", info);
 	XStoreName(dpy, DefaultRootWindow(dpy), str);
 	XSync(dpy, False);
 }
