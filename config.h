@@ -64,7 +64,7 @@ static const Layout layouts[] = {
 
 static const char scratchpadname[] = "scratchpadterm";
 #ifdef BSD
-static const char *scratchpadcmd[] = { "urxvtc", "-name", scratchpadname, NULL};
+static const char *scratchpadcmd[] = { "st", "-n", scratchpadname, NULL};
 #else
 static const char *scratchpadcmd[] = { "termite", "--name", scratchpadname, NULL};
 #endif
@@ -77,9 +77,9 @@ static const char *passcmd[] = { "passmenu", "-m", dmenumon, "-fn", dmenufont, "
 static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
 
 #ifdef BSD
-static const char *termcmd[]  = { "urxvtc", NULL };
+static const char *termcmd[]  = { "st", NULL };
 static const char *webcmd[]  = { "chrome", NULL };
-static const char *mailcmd[]  = {"urxvtc", "-e", "ssh", "-t", "akmodan", "/home/e arnest3/.mutt/launch.sh", NULL};
+static const char *mailcmd[]  = {"st", "-e", "ssh", "-t", "akmodan", "/home/e arnest3/.mutt/launch.sh", NULL};
 #else
 static const char *termcmd[]  = { "termite", NULL };
 static const char *webcmd[]  = { "google-chrome-stable", NULL };
