@@ -33,6 +33,7 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
+	{ "XConsole", NULL,       NULL,       1<<8,            1,           -1 },
 	{ "Gimp",     NULL,       NULL,       0,            1,           -1 },
 	/* { "Firefox",  NULL,       NULL,       1 << 8,       0,           -1 }, */
 };
@@ -78,7 +79,7 @@ static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
 
 #ifdef BSD
 static const char *termcmd[]  = { "st", NULL };
-static const char *webcmd[]  = { "chrome", NULL };
+static const char *webcmd[]  = { "firefox", NULL };
 static const char *mailcmd[]  = {"st", "-e", "ssh", "-t", "akmodan", "/home/earnest3/.mutt/launch.sh", NULL};
 #else
 static const char *termcmd[]  = { "termite", NULL };
