@@ -91,6 +91,8 @@ static const char *vol_up[]  = { "pulseaudio-ctl", "up", NULL };
 static const char *vol_down[]  = { "pulseaudio-ctl", "down", NULL };
 static const char *mute[]  = { "pulseaudio-ctl", "mute", NULL };
 static const char *mute_input[]  = { "pulseaudio-ctl", "mute-input", NULL };
+static const char *slock[]  = { "slock", NULL };
+static const char *toggle_touchpad[]  = { "toggle-touchpad", NULL };
 
 // the other terms are not changed due to varying command line arguments,
 // this just assures that a usable terminal is available
@@ -102,6 +104,8 @@ static char *webcmd[]  = { NULL, NULL };  // command is set in setup()
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+	{ 0,             XF86XK_TouchpadToggle,    spawn,             {.v = toggle_touchpad} }, 
+	{ 0,             XF86XK_ScreenSaver,       spawn,             {.v = slock} }, 
 	{ 0,             XF86XK_MonBrightnessUp,   spawn,             {.v = backlight_up} }, 
 	{ 0,             XF86XK_MonBrightnessDown, spawn,             {.v = backlight_down} }, 
 	{ 0,             XF86XK_Display,           spawn,             {.v = display_toggle} }, 
