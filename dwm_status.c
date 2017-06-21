@@ -76,31 +76,25 @@ file_exists (char *fname)
 }
 
 int
-ac_status()
+read_smapi_int(const char * fname)
 {
-  FILE *fp = fopen("/sys/devices/platform/smapi/ac_connected", "r");
-  int status=-1;
-  fscanf(fp, "%d", &status);
-  return status;
+  FILE *fp = fopen(fname, "r");
+  int v=-1;
+  fscanf(fp, "%d", &v);
+  fclose(fp);
+  return v;
 }
 
-int
-bat_remain()
-{
-  FILE *fp = fopen("/sys/devices/platform/smapi/BAT0/remaining_percent", "r");
-  int pct=-1;
-  fscanf(fp, "%d", &pct);
-  return pct;
-}
 
 int 
 batteryGraph(char *str, int n_str, char *bg, char *fgCharge, char *fgDischarge, char *fgCritical, int w, int y0, int y1, int margin)
 {
-    int connected = ac_status();
-    int remain = bat_remain();
+    int connected = read_smapi_int("/sys/devices/platform/smapi/ac_connected");
+    int remain = read_smapi_int("/sys/devices/platform/smapi/BAT0/remaining_capacity");
+    int last_total = read_smapi_int("/sys/devices/platform/smapi/BAT0/last_full_capacity");
     int x0 = margin;
     int h = y1-y0;
-    int y = h*remain*1e-2+0.5;
+    int y = 0.5 + 1.0*h*remain/last_total;
 
     char *fg;
 
@@ -127,7 +121,7 @@ status(Display *dpy, int device_count)
     char str[4096];
 
     if (check_bat) {
-        cur += batteryGraph(str, sizeof(str)-cur-1, "#202020", "#178712", "#871220", "#ff0000", 6, 2, 16, 5);
+        cur += batteryGraph(str, sizeof(str)-cur-1, "#202020", "#178712", "#871220", "#ff0000", 8, 2, 16, 5);
     }
 
     cur += cpuGraph(str+cur, sizeof(str)-cur-1, "#202020", "#575757", 2, 16, 5);
