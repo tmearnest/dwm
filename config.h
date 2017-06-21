@@ -84,7 +84,13 @@ static const char *scratchpadcmd[] = { "termite", "--name", scratchpadname, NULL
 static char dmenumon[2] = "0"; /* component of dmenucmd, manipulated in spawn() */
 static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
 static const char *passcmd[] = { "passmenu", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
-static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
+static const char *backlight_up[]  = { "xbacklight", "-inc", "10", NULL };
+static const char *backlight_down[]  = { "xbacklight", "-dec", "10", NULL };
+static const char *display_toggle[]  = { "monitor", "toggle", NULL };
+static const char *vol_up[]  = { "pulseaudio-ctl", "up", NULL };
+static const char *vol_down[]  = { "pulseaudio-ctl", "down", NULL };
+static const char *mute[]  = { "pulseaudio-ctl", "mute", NULL };
+static const char *mute_input[]  = { "pulseaudio-ctl", "mute-input", NULL };
 
 // the other terms are not changed due to varying command line arguments,
 // this just assures that a usable terminal is available
@@ -96,12 +102,19 @@ static char *webcmd[]  = { NULL, NULL };  // command is set in setup()
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
+	{ 0,             XF86XK_MonBrightnessUp,   spawn,             {.v = backlight_up} }, 
+	{ 0,             XF86XK_MonBrightnessDown, spawn,             {.v = backlight_down} }, 
+	{ 0,             XF86XK_Display,           spawn,             {.v = display_toggle} }, 
+	{ 0,             XF86XK_AudioLowerVolume,  spawn,             {.v = vol_down} }, 
+	{ 0,             XF86XK_AudioRaiseVolume,  spawn,             {.v = vol_up} }, 
+	{ 0,             XF86XK_AudioMute,         spawn,             {.v = mute} }, 
+	{ 0,             XF86XK_AudioMicMute,      spawn,             {.v = mute_input} }, 
+	{ 0,             XF86XK_Launch1,           togglescratch,     {.v = scratchpadcmd} }, 
 	{ MODKEY,                       XK_p,      spawn,          {.v = dmenucmd } },
 	{ MODKEY|ShiftMask,             XK_p,      spawn,          {.v = passcmd } },
 	{ MODKEY|ShiftMask,             XK_Return, spawn,          {.v = termcmd } },
 	{ MODKEY|ShiftMask,             XK_m,      spawn,          {.v = mailcmd} },
 	{ MODKEY,                       XK_b,      spawn,          {.v = webcmd} },
-	{ MODKEY,                       XK_e,      spawn,          {.v = emacscmd} },
 	{ MODKEY|ShiftMask,             XK_b,      togglebar,      {0} },
  	{ MODKEY,                       XK_grave,  togglescratch,  {.v = scratchpadcmd } },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
