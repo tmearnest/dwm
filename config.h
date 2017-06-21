@@ -24,6 +24,19 @@ static const char *colors[][4]      = {
 	[SchemeSel] =  { col_gray4, col_pri,   col_pri,   col_pri  },
 };
 
+static const char* browser_exes[] = {
+    "google-chrome-stable",
+    "chrome",
+    "chromium",
+    "firefox",
+    NULL};
+
+static const char* term_exes[] = {
+    "termite",
+    "urxvt",
+    "xterm",
+    NULL};
+
 /* tagging */
 static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
 
@@ -64,11 +77,7 @@ static const Layout layouts[] = {
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 static const char scratchpadname[] = "scratchpadterm";
-#ifdef BSD
-static const char *scratchpadcmd[] = { "st", "-n", scratchpadname, NULL};
-#else
 static const char *scratchpadcmd[] = { "termite", "--name", scratchpadname, NULL};
-#endif
 
 
 /* commands */
@@ -77,15 +86,13 @@ static const char *dmenucmd[] = { "dmenu_run", "-m", dmenumon, "-fn", dmenufont,
 static const char *passcmd[] = { "passmenu", "-m", dmenumon, "-fn", dmenufont, "-nb", col_gray1, "-nf", col_gray3, "-sb", col_pri, "-sf", col_gray4, NULL };
 static const char *emacscmd[]  = { "emacsclient", "-c", NULL };
 
-#ifdef BSD
-static const char *termcmd[]  = { "st", NULL };
-static const char *webcmd[]  = { "firefox", NULL };
-static const char *mailcmd[]  = {"st", "-e", "ssh", "-t", "akmodan", "/home/earnest3/.mutt/launch.sh", NULL};
-#else
-static const char *termcmd[]  = { "termite", NULL };
-static const char *webcmd[]  = { "google-chrome-stable", NULL };
+// the other terms are not changed due to varying command line arguments,
+// this just assures that a usable terminal is available
+static const char *termcmd[]  = { NULL, NULL }; // figured out in setup
+
 static const char *mailcmd[]  = {"termite", "-e", "ssh -t akmodan /home/earnest3/.mutt/launch.sh", NULL};
-#endif
+
+static char *webcmd[]  = { NULL, NULL };  // command is set in setup()
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
@@ -120,9 +127,7 @@ static Key keys[] = {
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
-#ifndef BSD
         { MODKEY|ShiftMask,             XK_r,      self_restart,   {0} }, 
-#endif
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)

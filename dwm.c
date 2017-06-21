@@ -288,6 +288,7 @@ static void bstackhoriz(Monitor *m);
 static void centeredmaster(Monitor *m);
 static void centeredfloatingmaster(Monitor *m);
 static void updateborderwidth(Client* c, int bw);
+static char * find_executable (const char **names);
  
 
 /* variables */
@@ -1947,6 +1948,10 @@ setup(void)
 	XSetWindowAttributes wa;
 	Atom utf8string;
 
+        /* find exes */
+        webcmd[0] = find_executable(browser_exes);
+        termcmd[0] = find_executable(term_exes);
+
 	/* clean up any zombies immediately */
 	sigchld(0);
 
@@ -3014,4 +3019,47 @@ centeredfloatingmaster(Monitor *m)
 		       m->wh - (2*c->bw), 0);
 		tx += WIDTH(c);
 	}
+}
+
+
+
+char *
+find_executable (const char **names)
+{
+    char buf[1024];
+    struct stat fs;
+    char *result = NULL;
+    const char *env_path = getenv("PATH");
+    char *pth = malloc(1+strlen(env_path));
+    char *tok;
+    int n_exes, i;
+
+    strcpy(pth, env_path);
+
+    for (n_exes = 0; names[n_exes]; n_exes++)
+        ;
+
+    if (pth) {
+        tok = strtok(pth, ":");
+        do {
+            for (i = 0; i < n_exes; i++) {
+                snprintf(buf, sizeof(buf)-1, "%s/%s", tok, names[i]);
+                if (stat(buf, &fs) == 0 && fs.st_mode & S_IXUSR) {
+                    result = malloc(1+strlen(buf));
+                    strcpy(result, buf);
+                    goto done;
+                }
+            }
+        } while ( (tok = strtok(NULL, ":")) );
+    }
+
+done:
+    free(pth);
+
+    if (!result) {
+        result = malloc(1+sizeof("/bin/false"));
+        strcpy(result, "/bin/false");
+    }
+
+    return result;
 }
