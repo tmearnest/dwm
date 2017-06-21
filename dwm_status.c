@@ -4,6 +4,7 @@
 #include <time.h>
 #include <string.h>
 #include <X11/Xlib.h>
+#include <sys/stat.h>
 
 #define N_CPU_DATA 45
 
@@ -65,16 +66,71 @@ cpuGraph(char *str, int n_str, char *bg, char *fg, int y0, int y1, int margin) {
     return cur;
 }
 
+static int check_bat = 0;
+
+int 
+file_exists (char *fname)
+{
+    struct stat fs;
+    return stat(fname, &fs) == 0 && fs.st_mode & S_IRUSR;
+}
+
+int
+ac_status()
+{
+  FILE *fp = fopen("/sys/devices/platform/smapi/ac_connected", "r");
+  int status=-1;
+  fscanf(fp, "%d", &status);
+  return status;
+}
+
+int
+bat_remain()
+{
+  FILE *fp = fopen("/sys/devices/platform/smapi/BAT0/remaining_percent", "r");
+  int pct=-1;
+  fscanf(fp, "%d", &pct);
+  return pct;
+}
+
+int 
+batteryGraph(char *str, int n_str, char *bg, char *fgCharge, char *fgDischarge, char *fgCritical, int w, int y0, int y1, int margin)
+{
+    int connected = ac_status();
+    int remain = bat_remain();
+    int x0 = margin;
+    int h = y1-y0;
+    int y = h*remain*1e-2+0.5;
+
+    char *fg;
+
+    if (connected) {
+        fg = fgCharge;
+    } else if (remain > 15) {
+        fg = fgDischarge;
+    } else {
+        fg = fgCritical;
+    }
+
+    return snprintf(str, n_str-1, "^c%s^^r%d,%d,%d,%d^^c%s^^r%d,%d,%d,%d^^f%d^^d^", 
+                    bg, 
+                    x0, y0, w, h, 
+                    fg,
+                    x0, y0 + h - y, w, y,
+                    w+margin); // assumes cpu graph follows
+}
 
 void
 status(Display *dpy, int device_count)
 {
-    unsigned int i;
-
     int cur = 0;
-    char str[1024];
+    char str[4096];
 
-    cur += cpuGraph(str, sizeof(str)-cur-1, "#202020", "#575757", 2, 16, 5);
+    if (check_bat) {
+        cur += batteryGraph(str, sizeof(str)-cur-1, "#202020", "#178712", "#871220", "#ff0000", 6, 2, 16, 5);
+    }
+
+    cur += cpuGraph(str+cur, sizeof(str)-cur-1, "#202020", "#575757", 2, 16, 5);
 
     time_t t;
     struct tm *info;
@@ -89,7 +145,8 @@ status(Display *dpy, int device_count)
 int
 main(int argc, char *argv[]) {
     int device_count = 0;
-
+    check_bat = file_exists("/sys/devices/platform/smapi/ac_connected") &&
+                file_exists("/sys/devices/platform/smapi/BAT0/remaining_percent");
     if (fork() == 0) {
         Display *dpy = XOpenDisplay(NULL);
         if (!dpy) {
