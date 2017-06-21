@@ -1322,13 +1322,19 @@ manage(Window w, XWindowAttributes *wa)
 
 	XClassHint ch = { NULL, NULL };
 	XGetClassHint(dpy, c->win, &ch);
+	const char *instance = ch.res_name  ? ch.res_name  : broken;
 
-	if (!strcmp(ch.res_name, scratchpadname)) {
+	if (!strcmp(instance, scratchpadname)) {
 		c->mon->tagset[c->mon->seltags] |= c->tags = scratchtag;
 		c->isfloating = True;
 		c->x = c->mon->wx + (c->mon->ww / 2 - WIDTH(c) / 2);
 		c->y = c->mon->wy + (c->mon->wh / 2 - HEIGHT(c) / 2);
 	}
+
+	if (ch.res_class)
+		XFree(ch.res_class);
+	if (ch.res_name)
+		XFree(ch.res_name);
 
 	configure(c); /* propagates border_width, if size doesn't change */
 	updatewindowtype(c);
