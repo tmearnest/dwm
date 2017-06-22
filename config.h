@@ -98,7 +98,7 @@ static const char *toggle_touchpad[]  = { "toggle-touchpad", NULL };
 // this just assures that a usable terminal is available
 static const char *termcmd[]  = { NULL, NULL }; // figured out in setup
 
-static const char *mailcmd[]  = {"termite", "-e", "ssh -t akmodan /home/earnest3/.mutt/launch.sh", NULL};
+static const char *mailcmd[]  = {"mutt-term",  NULL};
 
 static char *webcmd[]  = { NULL, NULL };  // command is set in setup()
 
