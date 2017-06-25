@@ -92,15 +92,17 @@ batteryGraph(char *str, int n_str, char *bg, char *fgCharge, char *fgDischarge, 
     int connected = read_smapi_int("/sys/devices/platform/smapi/ac_connected");
     int remain = read_smapi_int("/sys/devices/platform/smapi/BAT0/remaining_capacity");
     int last_total = read_smapi_int("/sys/devices/platform/smapi/BAT0/last_full_capacity");
+    double chargeFrac = 1.0*remain/last_total;
+
     int x0 = margin;
     int h = y1-y0;
-    int y = 0.5 + 1.0*h*remain/last_total;
+    int y = 0.5 + h*chargeFrac;
 
     char *fg;
 
     if (connected) {
         fg = fgCharge;
-    } else if (remain > 15) {
+    } else if (chargeFrac > 0.15) {
         fg = fgDischarge;
     } else {
         fg = fgCritical;
@@ -121,7 +123,7 @@ status(Display *dpy, int device_count)
     char str[4096];
 
     if (check_bat) {
-        cur += batteryGraph(str, sizeof(str)-cur-1, "#202020", "#178712", "#871220", "#ff0000", 8, 2, 16, 5);
+        cur += batteryGraph(str, sizeof(str)-cur-1, "#202020", "#178712", "#871220", "#ffff00", 8, 2, 16, 5);
     }
 
     cur += cpuGraph(str+cur, sizeof(str)-cur-1, "#202020", "#575757", 2, 16, 5);
